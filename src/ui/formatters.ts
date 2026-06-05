@@ -11,7 +11,7 @@ export function formatTokens(tokens: number): string {
   return `${Math.round(tokens)}`;
 }
 
-const USD_TO_SEK_RATE = 10;
+const FIXED_USD_TO_SEK_RATE = 10;
 
 export function formatUsd(usd: number, partial = false): string {
   const cents = Math.round(usd * 100);
@@ -25,7 +25,7 @@ export function formatUsd(usd: number, partial = false): string {
 }
 
 export function formatSek(usd: number): string {
-  const ore = Math.round(usd * USD_TO_SEK_RATE * 100);
+  const ore = Math.round(usd * FIXED_USD_TO_SEK_RATE * 100);
   return ore <= 0
     ? "0 SEK"
     : ore < 100
