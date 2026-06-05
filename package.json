@@ -1,7 +1,7 @@
 {
   "name": "copilot-usage-extension",
   "displayName": "Copilot Token Cost",
-  "description": "Local Copilot token usage and AI Credit billing cost.",
+  "description": "Copilot token usage and AI Credit billing cost from local or remote SSH logs.",
   "version": "0.0.3",
   "publisher": "tonyozr",
   "license": "MIT",
@@ -52,6 +52,7 @@
   ],
   "main": "./dist/extension.js",
   "extensionKind": [
+    "workspace",
     "ui"
   ],
   "capabilities": {
@@ -64,7 +65,7 @@
     },
     "virtualWorkspaces": {
       "supported": false,
-      "description": "Copilot Token Cost scans local VS Code and Copilot files from disk."
+      "description": "Copilot Token Cost scans VS Code and Copilot files from disk, including Remote SSH server storage when running remotely."
     }
   },
   "contributes": {
@@ -153,7 +154,7 @@
         "tonyozrCopilotUsage.dataPath": {
           "type": "string",
           "default": "",
-          "description": "Extra local folder to scan for Copilot usage data."
+          "description": "Extra folder to scan for Copilot usage data."
         }
       }
     }
