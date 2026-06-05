@@ -6,6 +6,8 @@ export async function locateCopilotDataPaths(extraPath: string): Promise<string[
   const home = homedir();
   const appData = process.env.APPDATA ?? join(home, 'AppData', 'Roaming');
   const candidates = [
+    join(home, '.vscode-remote', 'data', 'User', 'globalStorage'),
+    join(home, '.vscode-remote', 'data', 'User', 'workspaceStorage'),
     join(home, '.vscode-server', 'data', 'User', 'globalStorage'),
     join(home, '.vscode-server', 'data', 'User', 'workspaceStorage'),
     join(home, '.vscode-server-insiders', 'data', 'User', 'globalStorage'),

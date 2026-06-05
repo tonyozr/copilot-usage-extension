@@ -45,4 +45,18 @@ describe('locateCopilotDataPaths', () => {
 
     await expect(locateCopilotDataPaths('')).resolves.toEqual([globalStorage, workspaceStorage]);
   });
+
+  it('includes remote session VS Code storage roots from ~/.vscode-remote', async () => {
+    const home = await mkdtemp(join(tmpdir(), 'copilot-usage-remote-home-'));
+    roots.push(home);
+    process.env.HOME = home;
+    delete process.env.APPDATA;
+
+    const globalStorage = join(home, '.vscode-remote', 'data', 'User', 'globalStorage');
+    const workspaceStorage = join(home, '.vscode-remote', 'data', 'User', 'workspaceStorage');
+    await mkdir(globalStorage, { recursive: true });
+    await mkdir(workspaceStorage, { recursive: true });
+
+    await expect(locateCopilotDataPaths('')).resolves.toEqual([globalStorage, workspaceStorage]);
+  });
 });
