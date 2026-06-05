@@ -29,7 +29,7 @@ describe('package manifest and publish contents', () => {
 
     expect(manifest.main).toBe('./dist/extension.js');
     expect(manifest.license).toBe('MIT');
-    expect(manifest.extensionKind).toEqual(['ui']);
+    expect(manifest.extensionKind).toEqual(['workspace', 'ui']);
     expect(manifest.scripts['compile:production']).toBe('npm run check-types && node esbuild.js --production');
     expect(manifest.scripts['vscode:prepublish']).toBe('npm run compile:production');
     expect(manifest.scripts.package).toBe('vsce package --no-dependencies');
