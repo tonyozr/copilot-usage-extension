@@ -55,7 +55,7 @@ describe('UsageTreeProvider', () => {
 
     expect(rootChildren).toHaveLength(2);
     expect(provider.getTreeItem(rootChildren[0]).label).toBe('Today');
-    expect(provider.getTreeItem(rootChildren[0]).description).toBe('1 session | 150 (1.2$)');
+    expect(provider.getTreeItem(rootChildren[0]).description).toBe('1 session | 150 (12 SEK (1.2$))');
     expect(provider.getTreeItem(rootChildren[0]).collapsibleState).toBe(vscode.TreeItemCollapsibleState.Expanded);
     expect(provider.getTreeItem(rootChildren[1]).label).toBe('Older');
     expect(provider.getTreeItem(rootChildren[1]).collapsibleState).toBe(vscode.TreeItemCollapsibleState.Collapsed);
@@ -85,7 +85,7 @@ describe('UsageTreeProvider', () => {
 
     const rootChildren = (await provider.getChildren()) ?? [];
 
-    expect(provider.getTreeItem(rootChildren[0]).description).toBe('2 sessions | 114k (2.4$)');
+    expect(provider.getTreeItem(rootChildren[0]).description).toBe('2 sessions | 114k (24 SEK (2.4$))');
   });
 
   it('renders bucket children as chat leaf rows without record children', async () => {
@@ -98,7 +98,7 @@ describe('UsageTreeProvider', () => {
     expect(chatChildren).toHaveLength(1);
     const chatItem = provider.getTreeItem(chatChildren[0]);
     expect(chatItem.label).toBe('Feature work');
-    expect(chatItem.description).toBe('09:30 | gpt-4.1 | 150 (1.2$)');
+    expect(chatItem.description).toBe('09:30 | gpt-4.1 | 150 (12 SEK (1.2$))');
     expect(chatItem.collapsibleState).toBe(vscode.TreeItemCollapsibleState.None);
     expect(chatItem.contextValue).toBe('chat');
     expect(await provider.getChildren(chatChildren[0])).toEqual([]);
@@ -172,7 +172,7 @@ describe('UsageTreeProvider', () => {
 
     const chatChildren = (await provider.getChildren(rootChildren[0])) ?? [];
 
-    expect(provider.getTreeItem(chatChildren[0]).description).toBe('2026-05-26 16:18 | gpt-4.1 | 23k (1.2$)');
+    expect(provider.getTreeItem(chatChildren[0]).description).toBe('2026-05-26 16:18 | gpt-4.1 | 23k (12 SEK (1.2$))');
   });
 
   it('uses the current clock value when building root buckets', async () => {
@@ -185,7 +185,7 @@ describe('UsageTreeProvider', () => {
 
     expect(rootChildren).toHaveLength(1);
     expect(provider.getTreeItem(rootChildren[0]).label).toBe('Today');
-    expect(provider.getTreeItem(rootChildren[0]).description).toBe('1 session | 125 (1.2$)');
+    expect(provider.getTreeItem(rootChildren[0]).description).toBe('1 session | 125 (12 SEK (1.2$))');
     const chatChildren = (await provider.getChildren(rootChildren[0])) ?? [];
     expect(provider.getTreeItem(chatChildren[0]).label).toBe('New day work');
   });
@@ -199,7 +199,7 @@ describe('UsageTreeProvider', () => {
     expect(rootChildren).toHaveLength(1);
     const bucketItem = provider.getTreeItem(rootChildren[0]);
     expect(bucketItem.label).toBe('Yesterday');
-    expect(bucketItem.description).toBe('1 session | 175 (1.2$)');
+    expect(bucketItem.description).toBe('1 session | 175 (12 SEK (1.2$))');
     expect(bucketItem.collapsibleState).toBe(vscode.TreeItemCollapsibleState.Collapsed);
   });
 
@@ -250,12 +250,12 @@ describe('UsageTreeProvider', () => {
     const rootChildren = (await provider.getChildren()) ?? [];
     const bucketItem = provider.getTreeItem(rootChildren[0]);
     expect(bucketItem.tooltip).toContain('Tokens: 23300');
-    expect(bucketItem.tooltip).toContain('Cost: 0.04$');
+    expect(bucketItem.tooltip).toContain('Cost: 0.40 SEK (0.04$)');
 
     const chatChildren = (await provider.getChildren(rootChildren[0])) ?? [];
     const chatItem = provider.getTreeItem(chatChildren[0]);
     expect(chatItem.tooltip).toContain('Tokens: 23300');
-    expect(chatItem.tooltip).toContain('Cost: 0.04$');
+    expect(chatItem.tooltip).toContain('Cost: 0.40 SEK (0.04$)');
   });
 
   it('omits zero-credit costs from bucket and chat rows', async () => {

@@ -217,7 +217,7 @@ describe("formatStatusBarTooltip", () => {
     expect(tooltip.supportHtml).toBe(true);
     expect(tooltip.supportThemeIcons).toBe(true);
     expect(tooltip.value).not.toContain("<pre>");
-    expect(formatStatusBarSummary(summary)).toBe("1.2M | 8.4$");
+    expect(formatStatusBarSummary(summary)).toBe("1.2M | 84 SEK (8.4$)");
     expect(
       tooltip.value.startsWith(
         'Cost is based on <a href="https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals">GitHub Copilot Usage-based billing $(link-external)</a>\n',
@@ -226,7 +226,7 @@ describe("formatStatusBarTooltip", () => {
     expect(tooltip.value).not.toContain("## Today:");
     expect(tooltip.value).not.toContain("Week:");
     expect(tooltip.value).toContain(
-      "**Today:** 1.2M (8.4$) &nbsp; | &nbsp; **Month:** 8.9M (21.6$) &nbsp; | &nbsp; **All time:** 22M (42.2$)",
+      "**Today:** 1.2M (84 SEK (8.4$)) &nbsp; | &nbsp; **Month:** 8.9M (215.9 SEK (21.6$)) &nbsp; | &nbsp; **All time:** 22M (421.5 SEK (42.2$))",
     );
     expect(tooltip.value).toContain("---");
     expect(tooltip.value).not.toContain("GitHub Copilot usage-based");
@@ -234,23 +234,23 @@ describe("formatStatusBarTooltip", () => {
     expect(tooltip.value).not.toContain('<strong>Model usage:</strong>');
     expect(tooltip.value).not.toContain('<strong>Top models:</strong>');
     expect(tooltip.value).toContain(
-      '<td>1. Claude opus 4.6</td><td align="right">12 sessions | 5.2M (8.4$)</td>',
+      '<td>1. Claude opus 4.6</td><td align="right">12 sessions | 5.2M (84 SEK (8.4$))</td>',
     );
     expect(tooltip.value).not.toContain("<em>Claude opus 4.6</em>");
     expect(tooltip.value).toContain(
       '<tr><td colspan="2"><strong>Most tokens today:</strong></td></tr>',
     );
     expect(tooltip.value).toContain(
-      '<td>Feature work | Claude opus 4.6</td><td align="right">420k (2.1$)</td>',
+      '<td>Feature work | Claude opus 4.6</td><td align="right">420k (21 SEK (2.1$))</td>',
     );
     expect(tooltip.value).toContain(
-      '<td>Feature work | Claude opus 4.6</td><td align="right">420k (2.1$)</td></tr>\n</table>\n\n---\n\n<table width="100%">\n<tr><td colspan="2"><strong>Most expensive today:</strong></td></tr>',
+      '<td>Feature work | Claude opus 4.6</td><td align="right">420k (21 SEK (2.1$))</td></tr>\n</table>\n\n---\n\n<table width="100%">\n<tr><td colspan="2"><strong>Most expensive today:</strong></td></tr>',
     );
     expect(tooltip.value).toContain(
       '<tr><td colspan="2"><strong>Most expensive today:</strong></td></tr>',
     );
     expect(tooltip.value).toContain(
-      '<td>Cost audit | Claude opus 4.7</td><td align="right">316k (4.8$)</td>',
+      '<td>Cost audit | Claude opus 4.7</td><td align="right">316k (48.3 SEK (4.8$))</td>',
     );
     expect(tooltip.value).not.toContain("<thead>");
     expect(tooltip.value).not.toContain("<small>");
