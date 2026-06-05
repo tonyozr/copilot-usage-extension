@@ -17,7 +17,7 @@ import type {
   UsageSummary,
 } from "./core/types";
 import { UsageIndex } from "./core/usageIndex";
-import { formatTokens, formatUsd } from "./ui/formatters";
+import { formatCost, formatTokens } from "./ui/formatters";
 import {
   formatDiagnostics,
   UsageTreeProvider,
@@ -57,7 +57,7 @@ function formatSessionCount(count: number): string {
 }
 
 function formatStatusBarCost(cost: CopilotCostEstimate): string | undefined {
-  return cost.available && cost.aiCredits > 0 ? formatUsd(cost.usd) : undefined;
+  return cost.available && cost.aiCredits > 0 ? formatCost(cost.usd) : undefined;
 }
 
 export function formatStatusBarTooltip(summary: UsageSummary): vscode.MarkdownString {

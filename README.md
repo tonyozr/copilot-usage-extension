@@ -2,7 +2,7 @@
 
 Lightweight Copilot usage viewer for token count and AI credit cost from Copilot log files. Runs locally. Requires `github.copilot.chat.agentDebugLog.fileLogging.enabled`.
 
-Dollar amounts use GitHub's [Copilot usage-based billing docs](https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals): 1 AI Credit = $0.01 USD. They are not final billed cost and exclude plans, pooled credits, discounts, taxes, and adjustments.
+Displayed costs default to SEK with USD shown in parentheses, using GitHub's [Copilot usage-based billing docs](https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals) and a fixed conversion of $1 USD = 10 SEK. They are not final billed cost and exclude plans, pooled credits, discounts, taxes, and adjustments.
 
 > Only sessions with AI Credits are counted. Older logs that predate usage-based billing are ignored.
 
