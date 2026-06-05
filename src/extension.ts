@@ -32,9 +32,9 @@ const STATUS_BAR_DISPLAY = {
   tooltip: "Click to open Copilot usage.",
   separator: " | ",
 };
-const SETUP_NEEDED_CONTEXT = "copilotUsage.setupNeeded";
-const SORT_MODE_CONTEXT = "copilotUsage.sortMode";
-const SORT_MODE_STORAGE_KEY = "copilotUsage.sortMode";
+const SETUP_NEEDED_CONTEXT = "tonyozrCopilotUsage.setupNeeded";
+const SORT_MODE_CONTEXT = "tonyozrCopilotUsage.sortMode";
+const SORT_MODE_STORAGE_KEY = "tonyozrCopilotUsage.sortMode";
 
 const USAGE_WATCH_GLOB =
   "**/{github.copilot-chat,GitHub.copilot-chat,debug-logs,transcripts,chatSessions,chatsessions,emptyWindowChatSessions,emptywindowchatsessions}/**";
@@ -165,25 +165,25 @@ export function formatStatusBarSummary(summary: UsageSummary): string {
 function setStatusBarScanning(statusBar: vscode.StatusBarItem): void {
   statusBar.text = STATUS_BAR_DISPLAY.scanningText;
   statusBar.tooltip = STATUS_BAR_DISPLAY.tooltip;
-  statusBar.command = "copilotUsage.openView";
+  statusBar.command = "tonyozrCopilotUsage.openView";
 }
 
 function setStatusBarReady(statusBar: vscode.StatusBarItem, summary: UsageSummary): void {
   statusBar.text = formatStatusBarSummary(summary);
   statusBar.tooltip = formatStatusBarTooltip(summary);
-  statusBar.command = "copilotUsage.openView";
+  statusBar.command = "tonyozrCopilotUsage.openView";
 }
 
 function setStatusBarFailed(statusBar: vscode.StatusBarItem, error: unknown): void {
   statusBar.text = STATUS_BAR_DISPLAY.failedText;
   statusBar.tooltip = error instanceof Error ? error.message : String(error);
-  statusBar.command = "copilotUsage.openView";
+  statusBar.command = "tonyozrCopilotUsage.openView";
 }
 
 function setStatusBarSetupNeeded(statusBar: vscode.StatusBarItem): void {
   statusBar.text = STATUS_BAR_DISPLAY.setupNeededText;
   statusBar.tooltip = undefined;
-  statusBar.command = "copilotUsage.openCopilotLoggingSetting";
+  statusBar.command = "tonyozrCopilotUsage.openCopilotLoggingSetting";
 }
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -200,7 +200,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const changedPaths = new Set<string>();
   const deletedPaths = new Set<string>();
 
-  statusBar.command = "copilotUsage.openView";
+  statusBar.command = "tonyozrCopilotUsage.openView";
   setStatusBarScanning(statusBar);
   statusBar.show();
   void setSortModeContext(readPersistedSortMode(context));
@@ -237,7 +237,7 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   async function openView(): Promise<void> {
-    await vscode.commands.executeCommand("copilotUsage.views.usage.focus");
+    await vscode.commands.executeCommand("tonyozrCopilotUsage.views.usage.focus");
   }
 
   async function openSourceLog(node: UsageNode | undefined): Promise<void> {
@@ -430,21 +430,21 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     statusBar,
-    vscode.window.registerTreeDataProvider("copilotUsage.views.usage", treeProvider),
-    vscode.commands.registerCommand("copilotUsage.refresh", () => runRefresh()),
-    vscode.commands.registerCommand("copilotUsage.openView", () => openView()),
-    vscode.commands.registerCommand("copilotUsage.openSourceLog", (node?: UsageNode) =>
+    vscode.window.registerTreeDataProvider("tonyozrCopilotUsage.views.usage", treeProvider),
+    vscode.commands.registerCommand("tonyozrCopilotUsage.refresh", () => runRefresh()),
+    vscode.commands.registerCommand("tonyozrCopilotUsage.openView", () => openView()),
+    vscode.commands.registerCommand("tonyozrCopilotUsage.openSourceLog", (node?: UsageNode) =>
       openSourceLog(node),
     ),
-    vscode.commands.registerCommand("copilotUsage.sortSessionsByCost", () => setSortMode("cost")),
-    vscode.commands.registerCommand("copilotUsage.sortSessionsByTime", () => setSortMode("time")),
-    vscode.commands.registerCommand("copilotUsage.openCopilotLoggingSetting", () =>
+    vscode.commands.registerCommand("tonyozrCopilotUsage.sortSessionsByCost", () => setSortMode("cost")),
+    vscode.commands.registerCommand("tonyozrCopilotUsage.sortSessionsByTime", () => setSortMode("time")),
+    vscode.commands.registerCommand("tonyozrCopilotUsage.openCopilotLoggingSetting", () =>
       vscode.commands.executeCommand(
         "workbench.action.openSettings",
         `@id:${COPILOT_FILE_LOGGING_SETTING}`,
       ),
     ),
-    vscode.commands.registerCommand("copilotUsage.showDiagnostics", () =>
+    vscode.commands.registerCommand("tonyozrCopilotUsage.showDiagnostics", () =>
       vscode.window.showInformationMessage(
         latestDiagnostics
           ? formatDiagnostics(latestDiagnostics)
@@ -454,7 +454,7 @@ export function activate(context: vscode.ExtensionContext): void {
     ),
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (
-        !event.affectsConfiguration("copilotUsage") &&
+        !event.affectsConfiguration("tonyozrCopilotUsage") &&
         !event.affectsConfiguration(COPILOT_FILE_LOGGING_SETTING)
       ) {
         return;

@@ -46,23 +46,23 @@ describe('package manifest and publish contents', () => {
     expect(manifest.scripts.update).toBeUndefined();
     expect(manifest.devDependencies.sharp).toBeUndefined();
     expect(manifest.contributes.viewsContainers.activitybar).toContainEqual({
-      id: 'copilotUsage',
+      id: 'tonyozrCopilotUsage',
       title: 'Copilot Sessions',
       icon: 'logos/logo.svg',
     });
     expect(manifest.contributes.views.explorer).toBeUndefined();
-    expect(manifest.contributes.views.copilotUsage).toEqual([
+    expect(manifest.contributes.views.tonyozrCopilotUsage).toEqual([
       {
-        id: 'copilotUsage.views.usage',
+        id: 'tonyozrCopilotUsage.views.usage',
         name: 'Copilot Sessions',
         icon: 'logos/logo.svg',
       },
     ]);
     expect(manifest.contributes.viewsWelcome).toEqual([
       {
-        view: 'copilotUsage.views.usage',
-        contents: '[Enable Copilot logs to see token use](command:copilotUsage.openCopilotLoggingSetting)',
-        when: 'copilotUsage.setupNeeded',
+        view: 'tonyozrCopilotUsage.views.usage',
+        contents: '[Enable Copilot logs to see token use](command:tonyozrCopilotUsage.openCopilotLoggingSetting)',
+        when: 'tonyozrCopilotUsage.setupNeeded',
       },
     ]);
     expect(manifest.contributes.commands.map((command) => command.title)).toEqual([
@@ -73,38 +73,38 @@ describe('package manifest and publish contents', () => {
       'Sort Sessions by Time',
     ]);
     expect(manifest.contributes.commands).toContainEqual({
-      command: 'copilotUsage.openSourceLog',
+      command: 'tonyozrCopilotUsage.openSourceLog',
       title: 'Open Source Log',
       category: 'Copilot Token Cost',
     });
     expect(manifest.contributes.commands).toContainEqual({
-      command: 'copilotUsage.sortSessionsByCost',
+      command: 'tonyozrCopilotUsage.sortSessionsByCost',
       title: 'Sort Sessions by Cost',
       category: 'Copilot Token Cost',
       icon: '$(sort-precedence)',
     });
     expect(manifest.contributes.commands).toContainEqual({
-      command: 'copilotUsage.sortSessionsByTime',
+      command: 'tonyozrCopilotUsage.sortSessionsByTime',
       title: 'Sort Sessions by Time',
       category: 'Copilot Token Cost',
       icon: '$(history)',
     });
     expect(manifest.contributes.menus?.['view/title']).toContainEqual({
-      command: 'copilotUsage.sortSessionsByCost',
-      when: 'view == copilotUsage.views.usage && copilotUsage.sortMode == time',
+      command: 'tonyozrCopilotUsage.sortSessionsByCost',
+      when: 'view == tonyozrCopilotUsage.views.usage && tonyozrCopilotUsage.sortMode == time',
       group: 'navigation@2',
     });
     expect(manifest.contributes.menus?.['view/title']).toContainEqual({
-      command: 'copilotUsage.sortSessionsByTime',
-      when: 'view == copilotUsage.views.usage && copilotUsage.sortMode == cost',
+      command: 'tonyozrCopilotUsage.sortSessionsByTime',
+      when: 'view == tonyozrCopilotUsage.views.usage && tonyozrCopilotUsage.sortMode == cost',
       group: 'navigation@2',
     });
     expect(manifest.contributes.menus?.['view/item/context']).toContainEqual({
-      command: 'copilotUsage.openSourceLog',
-      when: 'view == copilotUsage.views.usage && viewItem == chat',
+      command: 'tonyozrCopilotUsage.openSourceLog',
+      when: 'view == tonyozrCopilotUsage.views.usage && viewItem == chat',
       group: 'navigation@1',
     });
-    expect(Object.keys(manifest.contributes.configuration.properties)).toEqual(['copilotUsage.dataPath']);
+    expect(Object.keys(manifest.contributes.configuration.properties)).toEqual(['tonyozrCopilotUsage.dataPath']);
   });
 
   it('debugs the bundled output used by the extension host', async () => {

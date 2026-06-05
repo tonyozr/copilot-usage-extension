@@ -22,7 +22,7 @@ describe('readConfig', () => {
       maxFileSizeMb: 200,
       maxScanDepth: 12,
     });
-    expect(getConfiguration).toHaveBeenCalledWith('copilotUsage');
+    expect(getConfiguration).toHaveBeenCalledWith('tonyozrCopilotUsage');
     expect(get).toHaveBeenCalledTimes(1);
     expect(get).toHaveBeenCalledWith('dataPath', '');
   });
