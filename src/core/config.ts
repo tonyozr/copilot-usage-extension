@@ -9,7 +9,7 @@ export function isCopilotFileLoggingEnabled(): boolean {
 }
 
 export function readConfig(): ExtensionConfig {
-  const config = vscode.workspace.getConfiguration('copilotUsage');
+  const config = vscode.workspace.getConfiguration('tonyozrCopilotUsage');
 
   return {
     dataPath: config.get('dataPath', ''),

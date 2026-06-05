@@ -3,7 +3,7 @@
   "displayName": "Copilot Token Cost",
   "description": "Local Copilot token usage and AI Credit billing cost.",
   "version": "0.0.3",
-  "publisher": "leonbjorklund",
+  "publisher": "tonyozr",
   "license": "MIT",
   "scripts": {
     "clean": "node -e \"const fs=require('node:fs'); for (const dir of ['dist','out']) fs.rmSync(dir,{recursive:true,force:true});\"",
@@ -26,12 +26,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/leonbjorklund/copilot-usage-extension.git"
+    "url": "https://github.com/tonyozr/copilot-usage-extension.git"
   },
   "bugs": {
-    "url": "https://github.com/leonbjorklund/copilot-usage-extension/issues"
+    "url": "https://github.com/tonyozr/copilot-usage-extension/issues"
   },
-  "homepage": "https://github.com/leonbjorklund/copilot-usage-extension#readme",
+  "homepage": "https://github.com/tonyozr/copilot-usage-extension#readme",
   "keywords": [
     "copilot",
     "usage",
@@ -59,7 +59,7 @@
       "supported": "limited",
       "description": "Copilot Token Cost works in Restricted Mode, but workspace-defined custom scan paths are ignored until the workspace is trusted.",
       "restrictedConfigurations": [
-        "copilotUsage.dataPath"
+        "tonyozrCopilotUsage.dataPath"
       ]
     },
     "virtualWorkspaces": {
@@ -70,26 +70,26 @@
   "contributes": {
     "commands": [
       {
-        "command": "copilotUsage.refresh",
+        "command": "tonyozrCopilotUsage.refresh",
         "title": "Copilot Token Cost: Refresh"
       },
       {
-        "command": "copilotUsage.showDiagnostics",
+        "command": "tonyozrCopilotUsage.showDiagnostics",
         "title": "Copilot Token Cost: Show Scan Diagnostics"
       },
       {
-        "command": "copilotUsage.openSourceLog",
+        "command": "tonyozrCopilotUsage.openSourceLog",
         "title": "Open Source Log",
         "category": "Copilot Token Cost"
       },
       {
-        "command": "copilotUsage.sortSessionsByCost",
+        "command": "tonyozrCopilotUsage.sortSessionsByCost",
         "title": "Sort Sessions by Cost",
         "category": "Copilot Token Cost",
         "icon": "$(sort-precedence)"
       },
       {
-        "command": "copilotUsage.sortSessionsByTime",
+        "command": "tonyozrCopilotUsage.sortSessionsByTime",
         "title": "Sort Sessions by Time",
         "category": "Copilot Token Cost",
         "icon": "$(history)"
@@ -98,26 +98,26 @@
     "menus": {
       "view/title": [
         {
-          "command": "copilotUsage.sortSessionsByCost",
-          "when": "view == copilotUsage.views.usage && copilotUsage.sortMode == time",
+          "command": "tonyozrCopilotUsage.sortSessionsByCost",
+          "when": "view == tonyozrCopilotUsage.views.usage && tonyozrCopilotUsage.sortMode == time",
           "group": "navigation@2"
         },
         {
-          "command": "copilotUsage.sortSessionsByTime",
-          "when": "view == copilotUsage.views.usage && copilotUsage.sortMode == cost",
+          "command": "tonyozrCopilotUsage.sortSessionsByTime",
+          "when": "view == tonyozrCopilotUsage.views.usage && tonyozrCopilotUsage.sortMode == cost",
           "group": "navigation@2"
         }
       ],
       "view/item/context": [
         {
-          "command": "copilotUsage.openSourceLog",
-          "when": "view == copilotUsage.views.usage && viewItem == chat",
+          "command": "tonyozrCopilotUsage.openSourceLog",
+          "when": "view == tonyozrCopilotUsage.views.usage && viewItem == chat",
           "group": "navigation@1"
         }
       ],
       "commandPalette": [
         {
-          "command": "copilotUsage.openSourceLog",
+          "command": "tonyozrCopilotUsage.openSourceLog",
           "when": "false"
         }
       ]
@@ -125,16 +125,16 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "copilotUsage",
+          "id": "tonyozrCopilotUsage",
           "title": "Copilot Sessions",
           "icon": "logos/logo.svg"
         }
       ]
     },
     "views": {
-      "copilotUsage": [
+      "tonyozrCopilotUsage": [
         {
-          "id": "copilotUsage.views.usage",
+          "id": "tonyozrCopilotUsage.views.usage",
           "name": "Copilot Sessions",
           "icon": "logos/logo.svg"
         }
@@ -142,15 +142,15 @@
     },
     "viewsWelcome": [
       {
-        "view": "copilotUsage.views.usage",
-        "contents": "[Enable Copilot logs to see token use](command:copilotUsage.openCopilotLoggingSetting)",
-        "when": "copilotUsage.setupNeeded"
+        "view": "tonyozrCopilotUsage.views.usage",
+        "contents": "[Enable Copilot logs to see token use](command:tonyozrCopilotUsage.openCopilotLoggingSetting)",
+        "when": "tonyozrCopilotUsage.setupNeeded"
       }
     ],
     "configuration": {
       "title": "Copilot Token Cost",
       "properties": {
-        "copilotUsage.dataPath": {
+        "tonyozrCopilotUsage.dataPath": {
           "type": "string",
           "default": "",
           "description": "Extra local folder to scan for Copilot usage data."

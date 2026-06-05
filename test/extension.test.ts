@@ -449,10 +449,10 @@ describe("activate", () => {
 
     expect(statusBar.text).toBe("Enable Copilot logs to see token use");
     expect(statusBar.tooltip).toBeUndefined();
-    expect(statusBar.command).toBe("copilotUsage.openCopilotLoggingSetting");
+    expect(statusBar.command).toBe("tonyozrCopilotUsage.openCopilotLoggingSetting");
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
       "setContext",
-      "copilotUsage.setupNeeded",
+      "tonyozrCopilotUsage.setupNeeded",
       true,
     );
     expect(usageIndexInstances[0].rebuild).not.toHaveBeenCalled();
@@ -465,13 +465,13 @@ describe("activate", () => {
 
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
       "setContext",
-      "copilotUsage.setupNeeded",
+      "tonyozrCopilotUsage.setupNeeded",
       false,
     );
   });
 
   it("opens the exact Copilot file logging setting", async () => {
-    const openSetting = await activatedCommand("copilotUsage.openCopilotLoggingSetting");
+    const openSetting = await activatedCommand("tonyozrCopilotUsage.openCopilotLoggingSetting");
     await openSetting();
 
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
@@ -481,11 +481,11 @@ describe("activate", () => {
   });
 
   it("opens the usage activity view directly from the status bar command", async () => {
-    const openView = await activatedCommand("copilotUsage.openView");
+    const openView = await activatedCommand("tonyozrCopilotUsage.openView");
     await openView();
 
     expect(vscode.commands.executeCommand).toHaveBeenCalledTimes(1);
-    expect(vscode.commands.executeCommand).toHaveBeenCalledWith("copilotUsage.views.usage.focus");
+    expect(vscode.commands.executeCommand).toHaveBeenCalledWith("tonyozrCopilotUsage.views.usage.focus");
     expect(vscode.commands.executeCommand).not.toHaveBeenCalledWith("workbench.view.explorer");
   });
 
@@ -509,7 +509,7 @@ describe("activate", () => {
     ]);
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
       "setContext",
-      "copilotUsage.sortMode",
+      "tonyozrCopilotUsage.sortMode",
       "cost",
     );
   });
@@ -518,14 +518,14 @@ describe("activate", () => {
     const context = createContext();
     await activateExtension(context);
     vi.mocked(vscode.commands.executeCommand).mockClear();
-    const sortByCost = commandCallback("copilotUsage.sortSessionsByCost");
+    const sortByCost = commandCallback("tonyozrCopilotUsage.sortSessionsByCost");
 
     await sortByCost();
 
-    expect(context.globalState.update).toHaveBeenCalledWith("copilotUsage.sortMode", "cost");
+    expect(context.globalState.update).toHaveBeenCalledWith("tonyozrCopilotUsage.sortMode", "cost");
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
       "setContext",
-      "copilotUsage.sortMode",
+      "tonyozrCopilotUsage.sortMode",
       "cost",
     );
   });
@@ -534,20 +534,20 @@ describe("activate", () => {
     const context = createContext("cost");
     await activateExtension(context);
     vi.mocked(vscode.commands.executeCommand).mockClear();
-    const sortByTime = commandCallback("copilotUsage.sortSessionsByTime");
+    const sortByTime = commandCallback("tonyozrCopilotUsage.sortSessionsByTime");
 
     await sortByTime();
 
-    expect(context.globalState.update).toHaveBeenCalledWith("copilotUsage.sortMode", "time");
+    expect(context.globalState.update).toHaveBeenCalledWith("tonyozrCopilotUsage.sortMode", "time");
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
       "setContext",
-      "copilotUsage.sortMode",
+      "tonyozrCopilotUsage.sortMode",
       "time",
     );
   });
 
   it("opens the newest source log for a usage tree chat", async () => {
-    const openSourceLog = await activatedCommand("copilotUsage.openSourceLog");
+    const openSourceLog = await activatedCommand("tonyozrCopilotUsage.openSourceLog");
     vi.mocked(vscode.Uri.file).mockClear();
 
     await openSourceLog(
@@ -569,7 +569,7 @@ describe("activate", () => {
     vi.mocked(vscode.window.showQuickPick).mockImplementationOnce(async () =>
       createSourceLogPick("C:/logs/new.jsonl"),
     );
-    const openSourceLog = await activatedCommand("copilotUsage.openSourceLog");
+    const openSourceLog = await activatedCommand("tonyozrCopilotUsage.openSourceLog");
 
     await openSourceLog(
       createChatNode([
@@ -771,7 +771,7 @@ describe("activate", () => {
 
     await activateExtension();
 
-    const refresh = commandCallback("copilotUsage.refresh");
+    const refresh = commandCallback("tonyozrCopilotUsage.refresh");
     await refresh();
     rejectFirst(firstError);
     await settle();
@@ -785,7 +785,7 @@ describe("activate", () => {
     const firstWatcher = watcherRegistrations[0].watcher;
 
     state.watchFolders = ["root", "root/session"];
-    const refresh = commandCallback("copilotUsage.refresh");
+    const refresh = commandCallback("tonyozrCopilotUsage.refresh");
     await refresh();
 
     expect(usageIndexInstances[0].rebuild).toHaveBeenCalledTimes(2);
