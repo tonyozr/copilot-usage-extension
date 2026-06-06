@@ -1463,7 +1463,7 @@ function formatStatusBarTooltip(summary) {
     formatTooltipSummaryItem("Month", summary.month),
     formatTooltipSummaryItem("All time", summary.allTime)
   ];
-  const lines = [summaryItems.join(" &nbsp; | &nbsp; "), "", "---", ""];
+  const lines = [formatTooltipSummaryLine(summaryItems), "", "---", ""];
   const topModelRows = summary.topModels.map(
     (model, index) => formatTopModelTableRow(
       index,
@@ -1480,7 +1480,10 @@ function formatStatusBarTooltip(summary) {
   return tooltip;
 }
 function formatTooltipSummaryItem(label, total) {
-  return `**${label}:** ${formatTokensWithCost2(total.tokens, total.githubCopilot)}`;
+  return `**${label}:**&nbsp;${formatTokensWithCost2(total.tokens, total.githubCopilot)}`;
+}
+function formatTooltipSummaryLine(items) {
+  return items.join("&nbsp;&nbsp;|&nbsp;&nbsp;");
 }
 function formatTokensWithCost2(tokens, costEstimate) {
   const cost = formatStatusBarCost(costEstimate);
