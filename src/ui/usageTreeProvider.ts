@@ -6,7 +6,7 @@ import type {
   UsageDiagnostics,
   UsageSummary,
 } from "../core/types";
-import { formatTokens, formatUsd } from "./formatters";
+import { formatCost, formatTokens } from "./formatters";
 
 type BucketId = "today" | "yesterday" | "older";
 export type UsageTreeSortMode = "time" | "cost";
@@ -185,12 +185,12 @@ function addCost(target: CopilotCostEstimate, addition: CopilotCostEstimate): vo
 }
 
 function formatTokensWithCost(tokens: number, cost: CopilotCostEstimate): string {
-  const formattedCost = hasDisplayableCost(cost) ? ` (${formatUsd(cost.usd)})` : "";
+  const formattedCost = hasDisplayableCost(cost) ? ` (${formatCost(cost.usd)})` : "";
   return `${formatTokens(tokens)}${formattedCost}`;
 }
 
 function formatCostTooltipLines(cost: CopilotCostEstimate): string[] {
-  return hasDisplayableCost(cost) ? [`Cost: ${formatUsd(cost.usd)}`] : [];
+  return hasDisplayableCost(cost) ? [`Cost: ${formatCost(cost.usd)}`] : [];
 }
 
 function hasDisplayableCost(cost: CopilotCostEstimate): boolean {
