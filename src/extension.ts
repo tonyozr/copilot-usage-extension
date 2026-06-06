@@ -11,13 +11,14 @@ import {
 import { locateCopilotDataPaths } from "./core/locator";
 import { isSameOrInsidePath, pathContainsUsageFolder } from "./core/scanner";
 import type {
+  ChatUsageSummary,
   CopilotCostEstimate,
   ExtensionConfig,
   UsageDiagnostics,
   UsageSummary,
 } from "./core/types";
 import { UsageIndex } from "./core/usageIndex";
-import { formatCost, formatTokens } from "./ui/formatters";
+import { FIXED_USD_TO_SEK_RATE, formatCost, formatTokens } from "./ui/formatters";
 import {
   formatDiagnostics,
   UsageTreeProvider,
@@ -39,9 +40,11 @@ const SORT_MODE_STORAGE_KEY = "tonyozrCopilotUsage.sortMode";
 const USAGE_WATCH_GLOB =
   "**/{github.copilot-chat,GitHub.copilot-chat,debug-logs,transcripts,chatSessions,chatsessions,emptyWindowChatSessions,emptywindowchatsessions}/**";
 const CUSTOM_DATA_PATH_WATCH_GLOB = "**/*.{json,jsonl}";
-const GITHUB_COPILOT_USAGE_BASED_BILLING_URL =
-  "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals";
-const TOOLTIP_TITLE = `Cost is based on <a href="${GITHUB_COPILOT_USAGE_BASED_BILLING_URL}">GitHub Copilot Usage-based billing $(link-external)</a>`;
+const STATUS_BAR_NUMBER_FORMATTER = new Intl.NumberFormat("en-US");
+const STATUS_BAR_CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 interface SourceLogPick extends vscode.QuickPickItem {
   filePath: string;
@@ -60,13 +63,33 @@ function formatStatusBarCost(cost: CopilotCostEstimate): string | undefined {
   return cost.available && cost.aiCredits > 0 ? formatCost(cost.usd) : undefined;
 }
 
+function formatStatusBarCurrency(amount: number): string {
+  return STATUS_BAR_CURRENCY_FORMATTER.format(amount);
+}
+
+function formatStatusBarTokens(tokens: number): string {
+  return `${STATUS_BAR_NUMBER_FORMATTER.format(tokens)} tok`;
+}
+
+function formatStatusBarCount(count: number, suffix: string): string {
+  return `${STATUS_BAR_NUMBER_FORMATTER.format(count)} ${suffix}`;
+}
+
+function getMonthChats(summary: UsageSummary, now: Date): ChatUsageSummary[] {
+  return summary.chats.filter(
+    (chat) =>
+      chat.timestamp.getFullYear() === now.getFullYear() &&
+      chat.timestamp.getMonth() === now.getMonth(),
+  );
+}
+
 export function formatStatusBarTooltip(summary: UsageSummary): vscode.MarkdownString {
   const summaryItems = [
     formatTooltipSummaryItem("Today", summary.today),
     formatTooltipSummaryItem("Month", summary.month),
     formatTooltipSummaryItem("All time", summary.allTime),
   ];
-  const lines = [TOOLTIP_TITLE, "", summaryItems.join(" &nbsp; | &nbsp; "), "", "---", ""];
+  const lines = [summaryItems.join(" &nbsp; | &nbsp; "), "", "---", ""];
 
   const topModelRows = summary.topModels.map((model, index) =>
     formatTopModelTableRow(
@@ -112,7 +135,7 @@ function formatTopModelsTooltipRows(rows: string[]): string[] {
 }
 
 function formatTooltipTable(rows: string[]): string[] {
-  return ['<table width="100%">', ...rows, "</table>"];
+  return ['<table width="100%" style="min-width: 450px">', ...rows, "</table>"];
 }
 
 function formatHighestTodayTooltipRows(summary: UsageSummary): string[] {
@@ -151,15 +174,29 @@ function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export function formatStatusBarSummary(summary: UsageSummary): string {
-  if (summary.today.tokens === 0) {
-    return "No sessions today";
+export function formatStatusBarSummary(summary: UsageSummary, now = new Date()): string {
+  if (summary.month.tokens === 0) {
+    return "No sessions this month";
   }
 
-  const cost = formatStatusBarCost(summary.today.githubCopilot);
-  return cost
-    ? [formatTokens(summary.today.tokens), cost].join(STATUS_BAR_DISPLAY.separator)
-    : formatTokens(summary.today.tokens);
+  const monthChats = getMonthChats(summary, now);
+  const requestCount = monthChats.reduce((total, chat) => total + chat.records.length, 0);
+  const segments = [];
+
+  if (summary.month.githubCopilot.available && summary.month.githubCopilot.aiCredits > 0) {
+    segments.push(
+      `${formatStatusBarCurrency(summary.month.githubCopilot.usd * FIXED_USD_TO_SEK_RATE)} SEK`,
+      `$${formatStatusBarCurrency(summary.month.githubCopilot.usd)}`,
+    );
+  }
+
+  segments.push(
+    formatStatusBarTokens(summary.month.tokens),
+    formatStatusBarCount(monthChats.length, "sess"),
+    formatStatusBarCount(requestCount, "req"),
+  );
+
+  return segments.join(STATUS_BAR_DISPLAY.separator);
 }
 
 function setStatusBarScanning(statusBar: vscode.StatusBarItem): void {
