@@ -40,9 +40,6 @@ const SORT_MODE_STORAGE_KEY = "tonyozrCopilotUsage.sortMode";
 const USAGE_WATCH_GLOB =
   "**/{github.copilot-chat,GitHub.copilot-chat,debug-logs,transcripts,chatSessions,chatsessions,emptyWindowChatSessions,emptywindowchatsessions}/**";
 const CUSTOM_DATA_PATH_WATCH_GLOB = "**/*.{json,jsonl}";
-const GITHUB_COPILOT_USAGE_BASED_BILLING_URL =
-  "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals";
-const TOOLTIP_TITLE = `Cost is based on <a href="${GITHUB_COPILOT_USAGE_BASED_BILLING_URL}">GitHub Copilot Usage-based billing $(link-external)</a>`;
 const STATUS_BAR_NUMBER_FORMATTER = new Intl.NumberFormat("en-US");
 const STATUS_BAR_CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
@@ -78,13 +75,12 @@ function formatStatusBarCount(count: number, suffix: string): string {
   return `${STATUS_BAR_NUMBER_FORMATTER.format(count)} ${suffix}`;
 }
 
-function getTodayChats(summary: UsageSummary): ChatUsageSummary[] {
-  if (!summary.highestSessionToday) {
-    return [];
-  }
-
-  const today = summary.highestSessionToday.timestamp;
-  return summary.chats.filter((chat) => isSameLocalDay(chat.timestamp, today));
+function getMonthChats(summary: UsageSummary, now: Date): ChatUsageSummary[] {
+  return summary.chats.filter(
+    (chat) =>
+      chat.timestamp.getFullYear() === now.getFullYear() &&
+      chat.timestamp.getMonth() === now.getMonth(),
+  );
 }
 
 export function formatStatusBarTooltip(summary: UsageSummary): vscode.MarkdownString {
@@ -93,7 +89,7 @@ export function formatStatusBarTooltip(summary: UsageSummary): vscode.MarkdownSt
     formatTooltipSummaryItem("Month", summary.month),
     formatTooltipSummaryItem("All time", summary.allTime),
   ];
-  const lines = [TOOLTIP_TITLE, "", summaryItems.join(" &nbsp; | &nbsp; "), "", "---", ""];
+  const lines = [summaryItems.join(" &nbsp; | &nbsp; "), "", "---", ""];
 
   const topModelRows = summary.topModels.map((model, index) =>
     formatTopModelTableRow(
@@ -139,7 +135,7 @@ function formatTopModelsTooltipRows(rows: string[]): string[] {
 }
 
 function formatTooltipTable(rows: string[]): string[] {
-  return ['<table width="100%">', ...rows, "</table>"];
+  return ['<table width="100%" style="min-width: 450px">', ...rows, "</table>"];
 }
 
 function formatHighestTodayTooltipRows(summary: UsageSummary): string[] {
@@ -178,37 +174,29 @@ function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export function formatStatusBarSummary(summary: UsageSummary): string {
-  if (summary.today.tokens === 0) {
-    return "No sessions today";
+export function formatStatusBarSummary(summary: UsageSummary, now = new Date()): string {
+  if (summary.month.tokens === 0) {
+    return "No sessions this month";
   }
 
-  const todayChats = getTodayChats(summary);
-  const requestCount = todayChats.reduce((total, chat) => total + chat.records.length, 0);
+  const monthChats = getMonthChats(summary, now);
+  const requestCount = monthChats.reduce((total, chat) => total + chat.records.length, 0);
   const segments = [];
 
-  if (summary.today.githubCopilot.available && summary.today.githubCopilot.aiCredits > 0) {
+  if (summary.month.githubCopilot.available && summary.month.githubCopilot.aiCredits > 0) {
     segments.push(
-      `${formatStatusBarCurrency(summary.today.githubCopilot.usd * FIXED_USD_TO_SEK_RATE)} SEK`,
-      `$${formatStatusBarCurrency(summary.today.githubCopilot.usd)}`,
+      `${formatStatusBarCurrency(summary.month.githubCopilot.usd * FIXED_USD_TO_SEK_RATE)} SEK`,
+      `$${formatStatusBarCurrency(summary.month.githubCopilot.usd)}`,
     );
   }
 
   segments.push(
-    formatStatusBarTokens(summary.today.tokens),
-    formatStatusBarCount(todayChats.length, "sess"),
+    formatStatusBarTokens(summary.month.tokens),
+    formatStatusBarCount(monthChats.length, "sess"),
     formatStatusBarCount(requestCount, "req"),
   );
 
   return segments.join(STATUS_BAR_DISPLAY.separator);
-}
-
-function isSameLocalDay(left: Date, right: Date): boolean {
-  return (
-    left.getFullYear() === right.getFullYear() &&
-    left.getMonth() === right.getMonth() &&
-    left.getDate() === right.getDate()
-  );
 }
 
 function setStatusBarScanning(statusBar: vscode.StatusBarItem): void {

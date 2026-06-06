@@ -223,12 +223,8 @@ describe("formatStatusBarTooltip", () => {
     expect(tooltip.supportHtml).toBe(true);
     expect(tooltip.supportThemeIcons).toBe(true);
     expect(tooltip.value).not.toContain("<pre>");
-    expect(formatStatusBarSummary(summary)).toBe("84.00 SEK | $8.40 | 1,200,000 tok | 2 sess | 3 req");
-    expect(
-      tooltip.value.startsWith(
-        'Cost is based on <a href="https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals">GitHub Copilot Usage-based billing $(link-external)</a>\n',
-      ),
-    ).toBe(true);
+    expect(formatStatusBarSummary(summary, new Date(2026, 4, 28))).toBe("215.90 SEK | $21.59 | 8,900,000 tok | 2 sess | 3 req");
+    expect(tooltip.value.startsWith("**Today:**")).toBe(true);
     expect(tooltip.value).not.toContain("## Today:");
     expect(tooltip.value).not.toContain("Week:");
     expect(tooltip.value).toContain(
@@ -250,7 +246,7 @@ describe("formatStatusBarTooltip", () => {
       '<td>Feature work | Claude opus 4.6</td><td align="right">420k (21 SEK (2.1$))</td>',
     );
     expect(tooltip.value).toContain(
-      '<td>Feature work | Claude opus 4.6</td><td align="right">420k (21 SEK (2.1$))</td></tr>\n</table>\n\n---\n\n<table width="100%">\n<tr><td colspan="2"><strong>Most expensive today:</strong></td></tr>',
+      '<td>Feature work | Claude opus 4.6</td><td align="right">420k (21 SEK (2.1$))</td></tr>\n</table>\n\n---\n\n<table width="100%" style="min-width: 450px">\n<tr><td colspan="2"><strong>Most expensive today:</strong></td></tr>',
     );
     expect(tooltip.value).toContain(
       '<tr><td colspan="2"><strong>Most expensive today:</strong></td></tr>',
@@ -287,7 +283,7 @@ describe("formatStatusBarTooltip", () => {
         "",
         "---",
         "",
-        '<table width="100%">',
+        '<table width="100%" style="min-width: 450px">',
         '<tr><td colspan="2"><strong>Model use:</strong></td></tr>',
         '<tr><td colspan="2">No sessions yet.</td></tr>',
         "</table>",
@@ -306,7 +302,14 @@ describe("formatStatusBarTooltip", () => {
         },
       },
       week: createTotal(0),
-      month: createTotal(0),
+      month: {
+        tokens: 1_200,
+        githubCopilot: {
+          available: false,
+          usd: 1.2,
+          aiCredits: 120,
+        },
+      },
       allTime: createTotal(0),
       topModels: [],
       highestSessionToday: createChatSummary("chat-1", new Date(2026, 4, 28, 9, 30), 1_200, 0),
@@ -318,7 +321,7 @@ describe("formatStatusBarTooltip", () => {
       ],
     };
 
-    expect(formatStatusBarSummary(summary)).toBe("1,200 tok | 1 sess | 1 req");
+    expect(formatStatusBarSummary(summary, new Date(2026, 4, 28))).toBe("1,200 tok | 1 sess | 1 req");
     expect(formatStatusBarTooltip(summary).value).not.toContain("GitHub Copilot usage-based");
   });
 
@@ -333,7 +336,14 @@ describe("formatStatusBarTooltip", () => {
         },
       },
       week: createTotal(0),
-      month: createTotal(0),
+      month: {
+        tokens: 1_200,
+        githubCopilot: {
+          available: true,
+          usd: 0,
+          aiCredits: 0,
+        },
+      },
       allTime: createTotal(0),
       topModels: [],
       highestSessionToday: createChatSummary("chat-1", new Date(2026, 4, 28, 9, 30), 1_200, 0),
@@ -345,12 +355,12 @@ describe("formatStatusBarTooltip", () => {
       ],
     };
 
-    expect(formatStatusBarSummary(summary)).toBe("1,200 tok | 1 sess | 1 req");
+    expect(formatStatusBarSummary(summary, new Date(2026, 4, 28))).toBe("1,200 tok | 1 sess | 1 req");
     expect(formatStatusBarTooltip(summary).value).toContain("**Today:** 1k");
     expect(formatStatusBarTooltip(summary).value).not.toContain("0$");
   });
 
-  it("formats status bar as no sessions today when today has no tokens", () => {
+  it("formats status bar as no sessions this month when month has no tokens", () => {
     const summary: UsageSummary = {
       today: createTotal(0),
       week: createTotal(0),
@@ -361,10 +371,10 @@ describe("formatStatusBarTooltip", () => {
       chats: [],
     };
 
-    expect(formatStatusBarSummary(summary)).toBe("No sessions today");
+    expect(formatStatusBarSummary(summary)).toBe("No sessions this month");
   });
 
-  it("counts only today's sessions and requests in the status bar", () => {
+  it("counts only this month's sessions and requests in the status bar", () => {
     const todayTimestamp = new Date(2026, 4, 28, 9, 30);
     const summary: UsageSummary = {
       today: createTotal(1_200, 1.2),
@@ -385,10 +395,14 @@ describe("formatStatusBarTooltip", () => {
           ...createChatSummary("older-chat", new Date(2026, 4, 27, 20, 0), 2_400, 2.4),
           records: [createUsageRecord("older.json", new Date(2026, 4, 27, 20, 0))],
         },
+        {
+          ...createChatSummary("prev-month-chat", new Date(2026, 3, 30, 10, 0), 1_000, 1.0),
+          records: [createUsageRecord("prev-month.json", new Date(2026, 3, 30, 10, 0))],
+        },
       ],
     };
 
-    expect(formatStatusBarSummary(summary)).toBe("12.00 SEK | $1.20 | 1,200 tok | 1 sess | 2 req");
+    expect(formatStatusBarSummary(summary, new Date(2026, 4, 28))).toBe("36.00 SEK | $3.60 | 3,600 tok | 2 sess | 3 req");
   });
 
   it("formats today fallback when no session exists today", () => {
