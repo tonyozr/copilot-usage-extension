@@ -89,7 +89,8 @@ export function formatStatusBarTooltip(summary: UsageSummary): vscode.MarkdownSt
     formatTooltipSummaryItem("Month", summary.month),
     formatTooltipSummaryItem("All time", summary.allTime),
   ];
-  const lines = [summaryItems.join(" &nbsp; | &nbsp; "), "", "---", ""];
+  const summaryRow = `<tr><td>${summaryItems.join(" &nbsp;&nbsp;|&nbsp;&nbsp; ")}</td></tr>`;
+  const lines = [...formatTooltipTable([summaryRow]), "", "---", ""];
 
   const topModelRows = summary.topModels.map((model, index) =>
     formatTopModelTableRow(
