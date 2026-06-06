@@ -11,6 +11,7 @@ import {
 import { locateCopilotDataPaths } from "./core/locator";
 import { isSameOrInsidePath, pathContainsUsageFolder } from "./core/scanner";
 import type {
+  ChatUsageSummary,
   CopilotCostEstimate,
   ExtensionConfig,
   UsageDiagnostics,
@@ -43,6 +44,10 @@ const GITHUB_COPILOT_USAGE_BASED_BILLING_URL =
   "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals";
 const TOOLTIP_TITLE = `Cost is based on <a href="${GITHUB_COPILOT_USAGE_BASED_BILLING_URL}">GitHub Copilot Usage-based billing $(link-external)</a>`;
 const STATUS_BAR_NUMBER_FORMATTER = new Intl.NumberFormat("en-US");
+const STATUS_BAR_CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 interface SourceLogPick extends vscode.QuickPickItem {
   filePath: string;
@@ -62,7 +67,7 @@ function formatStatusBarCost(cost: CopilotCostEstimate): string | undefined {
 }
 
 function formatStatusBarCurrency(amount: number): string {
-  return STATUS_BAR_NUMBER_FORMATTER.format(Number(amount.toFixed(2)));
+  return STATUS_BAR_CURRENCY_FORMATTER.format(amount);
 }
 
 function formatStatusBarTokens(tokens: number): string {
@@ -78,7 +83,8 @@ function getTodayChats(summary: UsageSummary): ChatUsageSummary[] {
     return [];
   }
 
-  return summary.chats.filter((chat) => isSameLocalDay(chat.timestamp, summary.highestSessionToday!.timestamp));
+  const today = summary.highestSessionToday.timestamp;
+  return summary.chats.filter((chat) => isSameLocalDay(chat.timestamp, today));
 }
 
 export function formatStatusBarTooltip(summary: UsageSummary): vscode.MarkdownString {
