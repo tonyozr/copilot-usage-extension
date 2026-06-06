@@ -43,6 +43,7 @@ const CUSTOM_DATA_PATH_WATCH_GLOB = "**/*.{json,jsonl}";
 const GITHUB_COPILOT_USAGE_BASED_BILLING_URL =
   "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals";
 const TOOLTIP_TITLE = `Cost is based on <a href="${GITHUB_COPILOT_USAGE_BASED_BILLING_URL}">GitHub Copilot Usage-based billing $(link-external)</a>`;
+const USD_TO_SEK_MULTIPLIER = 10;
 const STATUS_BAR_NUMBER_FORMATTER = new Intl.NumberFormat("en-US");
 const STATUS_BAR_CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
@@ -189,7 +190,7 @@ export function formatStatusBarSummary(summary: UsageSummary): string {
 
   if (summary.today.githubCopilot.available && summary.today.githubCopilot.aiCredits > 0) {
     segments.push(
-      `${formatStatusBarCurrency(summary.today.githubCopilot.usd * 10)} SEK`,
+      `${formatStatusBarCurrency(summary.today.githubCopilot.usd * USD_TO_SEK_MULTIPLIER)} SEK`,
       `$${formatStatusBarCurrency(summary.today.githubCopilot.usd)}`,
     );
   }
