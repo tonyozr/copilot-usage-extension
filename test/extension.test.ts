@@ -186,7 +186,10 @@ describe("formatStatusBarTooltip", () => {
         timestamp: new Date(2026, 4, 28, 9, 30),
         tokens: 420_000,
         githubCopilot: createCost(2.1),
-        records: [],
+        records: [
+          createUsageRecord("feature-1.json", new Date(2026, 4, 28, 9, 15)),
+          createUsageRecord("feature-2.json", new Date(2026, 4, 28, 9, 30)),
+        ],
       },
       mostExpensiveSessionToday,
       chats: [
@@ -197,7 +200,10 @@ describe("formatStatusBarTooltip", () => {
           timestamp: new Date(2026, 4, 28, 9, 30),
           tokens: 420_000,
           githubCopilot: createCost(2.1),
-          records: [],
+          records: [
+            createUsageRecord("feature-1.json", new Date(2026, 4, 28, 9, 15)),
+            createUsageRecord("feature-2.json", new Date(2026, 4, 28, 9, 30)),
+          ],
         },
         {
           chatId: "chat-2",
@@ -206,7 +212,7 @@ describe("formatStatusBarTooltip", () => {
           timestamp: new Date(2026, 4, 28, 11, 30),
           tokens: 120_000,
           githubCopilot: createCost(0.8),
-          records: [],
+          records: [createUsageRecord("smaller.json", new Date(2026, 4, 28, 11, 30))],
         },
       ],
     };
@@ -217,7 +223,7 @@ describe("formatStatusBarTooltip", () => {
     expect(tooltip.supportHtml).toBe(true);
     expect(tooltip.supportThemeIcons).toBe(true);
     expect(tooltip.value).not.toContain("<pre>");
-    expect(formatStatusBarSummary(summary)).toBe("1.2M | 84 SEK (8.4$)");
+    expect(formatStatusBarSummary(summary)).toBe("84.00 SEK | $8.40 | 1,200,000 tok | 2 sess | 3 req");
     expect(
       tooltip.value.startsWith(
         'Cost is based on <a href="https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals">GitHub Copilot Usage-based billing $(link-external)</a>\n',
@@ -303,11 +309,16 @@ describe("formatStatusBarTooltip", () => {
       month: createTotal(0),
       allTime: createTotal(0),
       topModels: [],
-      highestSessionToday: undefined,
-      chats: [],
+      highestSessionToday: createChatSummary("chat-1", new Date(2026, 4, 28, 9, 30), 1_200, 0),
+      chats: [
+        {
+          ...createChatSummary("chat-1", new Date(2026, 4, 28, 9, 30), 1_200, 0),
+          records: [createUsageRecord("missing-cost.json", new Date(2026, 4, 28, 9, 30))],
+        },
+      ],
     };
 
-    expect(formatStatusBarSummary(summary)).toBe("1k");
+    expect(formatStatusBarSummary(summary)).toBe("1,200 tok | 1 sess | 1 req");
     expect(formatStatusBarTooltip(summary).value).not.toContain("GitHub Copilot usage-based");
   });
 
@@ -325,11 +336,16 @@ describe("formatStatusBarTooltip", () => {
       month: createTotal(0),
       allTime: createTotal(0),
       topModels: [],
-      highestSessionToday: undefined,
-      chats: [],
+      highestSessionToday: createChatSummary("chat-1", new Date(2026, 4, 28, 9, 30), 1_200, 0),
+      chats: [
+        {
+          ...createChatSummary("chat-1", new Date(2026, 4, 28, 9, 30), 1_200, 0),
+          records: [createUsageRecord("zero-cost.json", new Date(2026, 4, 28, 9, 30))],
+        },
+      ],
     };
 
-    expect(formatStatusBarSummary(summary)).toBe("1k");
+    expect(formatStatusBarSummary(summary)).toBe("1,200 tok | 1 sess | 1 req");
     expect(formatStatusBarTooltip(summary).value).toContain("**Today:** 1k");
     expect(formatStatusBarTooltip(summary).value).not.toContain("0$");
   });
@@ -346,6 +362,33 @@ describe("formatStatusBarTooltip", () => {
     };
 
     expect(formatStatusBarSummary(summary)).toBe("No sessions today");
+  });
+
+  it("counts only today's sessions and requests in the status bar", () => {
+    const todayTimestamp = new Date(2026, 4, 28, 9, 30);
+    const summary: UsageSummary = {
+      today: createTotal(1_200, 1.2),
+      week: createTotal(3_600, 3.6),
+      month: createTotal(3_600, 3.6),
+      allTime: createTotal(3_600, 3.6),
+      topModels: [],
+      highestSessionToday: createChatSummary("today-chat", todayTimestamp, 1_200, 1.2),
+      chats: [
+        {
+          ...createChatSummary("today-chat", todayTimestamp, 1_200, 1.2),
+          records: [
+            createUsageRecord("today-1.json", new Date(2026, 4, 28, 9, 15)),
+            createUsageRecord("today-2.json", todayTimestamp),
+          ],
+        },
+        {
+          ...createChatSummary("older-chat", new Date(2026, 4, 27, 20, 0), 2_400, 2.4),
+          records: [createUsageRecord("older.json", new Date(2026, 4, 27, 20, 0))],
+        },
+      ],
+    };
+
+    expect(formatStatusBarSummary(summary)).toBe("12.00 SEK | $1.20 | 1,200 tok | 1 sess | 2 req");
   });
 
   it("formats today fallback when no session exists today", () => {

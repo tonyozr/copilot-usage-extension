@@ -42,6 +42,7 @@ const CUSTOM_DATA_PATH_WATCH_GLOB = "**/*.{json,jsonl}";
 const GITHUB_COPILOT_USAGE_BASED_BILLING_URL =
   "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals";
 const TOOLTIP_TITLE = `Cost is based on <a href="${GITHUB_COPILOT_USAGE_BASED_BILLING_URL}">GitHub Copilot Usage-based billing $(link-external)</a>`;
+const STATUS_BAR_NUMBER_FORMATTER = new Intl.NumberFormat("en-US");
 
 interface SourceLogPick extends vscode.QuickPickItem {
   filePath: string;
@@ -58,6 +59,26 @@ function formatSessionCount(count: number): string {
 
 function formatStatusBarCost(cost: CopilotCostEstimate): string | undefined {
   return cost.available && cost.aiCredits > 0 ? formatCost(cost.usd) : undefined;
+}
+
+function formatStatusBarCurrency(amount: number): string {
+  return STATUS_BAR_NUMBER_FORMATTER.format(Number(amount.toFixed(2)));
+}
+
+function formatStatusBarTokens(tokens: number): string {
+  return `${STATUS_BAR_NUMBER_FORMATTER.format(Math.round(tokens))} tok`;
+}
+
+function formatStatusBarCount(count: number, suffix: string): string {
+  return `${STATUS_BAR_NUMBER_FORMATTER.format(count)} ${suffix}`;
+}
+
+function getTodayChats(summary: UsageSummary): ChatUsageSummary[] {
+  if (!summary.highestSessionToday) {
+    return [];
+  }
+
+  return summary.chats.filter((chat) => isSameLocalDay(chat.timestamp, summary.highestSessionToday!.timestamp));
 }
 
 export function formatStatusBarTooltip(summary: UsageSummary): vscode.MarkdownString {
@@ -156,10 +177,32 @@ export function formatStatusBarSummary(summary: UsageSummary): string {
     return "No sessions today";
   }
 
-  const cost = formatStatusBarCost(summary.today.githubCopilot);
-  return cost
-    ? [formatTokens(summary.today.tokens), cost].join(STATUS_BAR_DISPLAY.separator)
-    : formatTokens(summary.today.tokens);
+  const todayChats = getTodayChats(summary);
+  const requestCount = todayChats.reduce((total, chat) => total + chat.records.length, 0);
+  const segments = [];
+
+  if (summary.today.githubCopilot.available && summary.today.githubCopilot.aiCredits > 0) {
+    segments.push(
+      `${formatStatusBarCurrency(summary.today.githubCopilot.usd * 10)} SEK`,
+      `$${formatStatusBarCurrency(summary.today.githubCopilot.usd)}`,
+    );
+  }
+
+  segments.push(
+    formatStatusBarTokens(summary.today.tokens),
+    formatStatusBarCount(todayChats.length, "sess"),
+    formatStatusBarCount(requestCount, "req"),
+  );
+
+  return segments.join(STATUS_BAR_DISPLAY.separator);
+}
+
+function isSameLocalDay(left: Date, right: Date): boolean {
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+  );
 }
 
 function setStatusBarScanning(statusBar: vscode.StatusBarItem): void {
