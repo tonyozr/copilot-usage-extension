@@ -47,7 +47,7 @@ function isCopilotFileLoggingEnabled() {
   return vscode.workspace.getConfiguration().get(COPILOT_FILE_LOGGING_SETTING, false);
 }
 function readConfig() {
-  const config = vscode.workspace.getConfiguration("copilotUsage");
+  const config = vscode.workspace.getConfiguration("tonyozrCopilotUsage");
   return {
     dataPath: config.get("dataPath", ""),
     maxFileSizeMb: 200,
@@ -63,6 +63,12 @@ async function locateCopilotDataPaths(extraPath) {
   const home = (0, import_node_os.homedir)();
   const appData = process.env.APPDATA ?? (0, import_node_path.join)(home, "AppData", "Roaming");
   const candidates = [
+    (0, import_node_path.join)(home, ".vscode-remote", "data", "User", "globalStorage"),
+    (0, import_node_path.join)(home, ".vscode-remote", "data", "User", "workspaceStorage"),
+    (0, import_node_path.join)(home, ".vscode-server", "data", "User", "globalStorage"),
+    (0, import_node_path.join)(home, ".vscode-server", "data", "User", "workspaceStorage"),
+    (0, import_node_path.join)(home, ".vscode-server-insiders", "data", "User", "globalStorage"),
+    (0, import_node_path.join)(home, ".vscode-server-insiders", "data", "User", "workspaceStorage"),
     (0, import_node_path.join)(appData, "Code", "User", "globalStorage"),
     (0, import_node_path.join)(appData, "Code", "User", "workspaceStorage"),
     (0, import_node_path.join)(appData, "Code - Insiders", "User", "globalStorage"),
@@ -1217,10 +1223,18 @@ function formatTokens(tokens) {
   }
   return `${Math.round(tokens)}`;
 }
+var FIXED_USD_TO_SEK_RATE = 10;
 function formatUsd(usd, partial = false) {
   const cents = Math.round(usd * 100);
   const formatted = cents <= 0 ? "0$" : cents < 100 ? `${(cents / 100).toFixed(2)}$` : `${Math.round(usd * 10) / 10}$`;
   return partial ? `${formatted}+` : formatted;
+}
+function formatSek(usd) {
+  const ore = Math.round(usd * FIXED_USD_TO_SEK_RATE * 100);
+  return ore <= 0 ? "0 SEK" : ore < 100 ? `${(ore / 100).toFixed(2)} SEK` : `${Math.round(ore / 10) / 10} SEK`;
+}
+function formatCost(usd) {
+  return `${formatSek(usd)} (${formatUsd(usd)})`;
 }
 
 // src/ui/usageTreeProvider.ts
@@ -1344,11 +1358,11 @@ function addCost2(target, addition) {
   target.available ||= addition.available;
 }
 function formatTokensWithCost(tokens, cost) {
-  const formattedCost = hasDisplayableCost(cost) ? ` (${formatUsd(cost.usd)})` : "";
+  const formattedCost = hasDisplayableCost(cost) ? ` (${formatCost(cost.usd)})` : "";
   return `${formatTokens(tokens)}${formattedCost}`;
 }
 function formatCostTooltipLines(cost) {
-  return hasDisplayableCost(cost) ? [`Cost: ${formatUsd(cost.usd)}`] : [];
+  return hasDisplayableCost(cost) ? [`Cost: ${formatCost(cost.usd)}`] : [];
 }
 function hasDisplayableCost(cost) {
   return cost.available && cost.aiCredits > 0;
@@ -1413,18 +1427,35 @@ var STATUS_BAR_DISPLAY = {
   tooltip: "Click to open Copilot usage.",
   separator: " | "
 };
-var SETUP_NEEDED_CONTEXT = "copilotUsage.setupNeeded";
-var SORT_MODE_CONTEXT = "copilotUsage.sortMode";
-var SORT_MODE_STORAGE_KEY = "copilotUsage.sortMode";
+var SETUP_NEEDED_CONTEXT = "tonyozrCopilotUsage.setupNeeded";
+var SORT_MODE_CONTEXT = "tonyozrCopilotUsage.sortMode";
+var SORT_MODE_STORAGE_KEY = "tonyozrCopilotUsage.sortMode";
 var USAGE_WATCH_GLOB = "**/{github.copilot-chat,GitHub.copilot-chat,debug-logs,transcripts,chatSessions,chatsessions,emptyWindowChatSessions,emptywindowchatsessions}/**";
 var CUSTOM_DATA_PATH_WATCH_GLOB = "**/*.{json,jsonl}";
-var GITHUB_COPILOT_USAGE_BASED_BILLING_URL = "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals";
-var TOOLTIP_TITLE = `Cost is based on <a href="${GITHUB_COPILOT_USAGE_BASED_BILLING_URL}">GitHub Copilot Usage-based billing $(link-external)</a>`;
+var STATUS_BAR_NUMBER_FORMATTER = new Intl.NumberFormat("en-US");
+var STATUS_BAR_CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
 function formatSessionCount2(count) {
   return `${count} ${count === 1 ? "session" : "sessions"}`;
 }
 function formatStatusBarCost(cost) {
-  return cost.available && cost.aiCredits > 0 ? formatUsd(cost.usd) : void 0;
+  return cost.available && cost.aiCredits > 0 ? formatCost(cost.usd) : void 0;
+}
+function formatStatusBarCurrency(amount) {
+  return STATUS_BAR_CURRENCY_FORMATTER.format(amount);
+}
+function formatStatusBarTokens(tokens) {
+  return `${STATUS_BAR_NUMBER_FORMATTER.format(tokens)} tok`;
+}
+function formatStatusBarCount(count, suffix) {
+  return `${STATUS_BAR_NUMBER_FORMATTER.format(count)} ${suffix}`;
+}
+function getMonthChats(summary, now) {
+  return summary.chats.filter(
+    (chat) => chat.timestamp.getFullYear() === now.getFullYear() && chat.timestamp.getMonth() === now.getMonth()
+  );
 }
 function formatStatusBarTooltip(summary) {
   const summaryItems = [
@@ -1432,7 +1463,7 @@ function formatStatusBarTooltip(summary) {
     formatTooltipSummaryItem("Month", summary.month),
     formatTooltipSummaryItem("All time", summary.allTime)
   ];
-  const lines = [TOOLTIP_TITLE, "", summaryItems.join(" &nbsp; | &nbsp; "), "", "---", ""];
+  const lines = [summaryItems.join(" &nbsp; | &nbsp; "), "", "---", ""];
   const topModelRows = summary.topModels.map(
     (model, index) => formatTopModelTableRow(
       index,
@@ -1465,7 +1496,7 @@ function formatTopModelsTooltipRows(rows) {
   ]);
 }
 function formatTooltipTable(rows) {
-  return ['<table width="100%">', ...rows, "</table>"];
+  return ['<table width="100%" style="min-width: 450px">', ...rows, "</table>"];
 }
 function formatHighestTodayTooltipRows(summary) {
   if (!summary.highestSessionToday) {
@@ -1495,32 +1526,45 @@ function formatTodayHighlightTableRows(label, chat) {
 function escapeHtml(value) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
-function formatStatusBarSummary(summary) {
-  if (summary.today.tokens === 0) {
-    return "No sessions today";
+function formatStatusBarSummary(summary, now = /* @__PURE__ */ new Date()) {
+  if (summary.month.tokens === 0) {
+    return "No sessions this month";
   }
-  const cost = formatStatusBarCost(summary.today.githubCopilot);
-  return cost ? [formatTokens(summary.today.tokens), cost].join(STATUS_BAR_DISPLAY.separator) : formatTokens(summary.today.tokens);
+  const monthChats = getMonthChats(summary, now);
+  const requestCount = monthChats.reduce((total, chat) => total + chat.records.length, 0);
+  const segments = [];
+  if (summary.month.githubCopilot.available && summary.month.githubCopilot.aiCredits > 0) {
+    segments.push(
+      `${formatStatusBarCurrency(summary.month.githubCopilot.usd * FIXED_USD_TO_SEK_RATE)} SEK`,
+      `$${formatStatusBarCurrency(summary.month.githubCopilot.usd)}`
+    );
+  }
+  segments.push(
+    formatStatusBarTokens(summary.month.tokens),
+    formatStatusBarCount(monthChats.length, "sess"),
+    formatStatusBarCount(requestCount, "req")
+  );
+  return segments.join(STATUS_BAR_DISPLAY.separator);
 }
 function setStatusBarScanning(statusBar) {
   statusBar.text = STATUS_BAR_DISPLAY.scanningText;
   statusBar.tooltip = STATUS_BAR_DISPLAY.tooltip;
-  statusBar.command = "copilotUsage.openView";
+  statusBar.command = "tonyozrCopilotUsage.openView";
 }
 function setStatusBarReady(statusBar, summary) {
   statusBar.text = formatStatusBarSummary(summary);
   statusBar.tooltip = formatStatusBarTooltip(summary);
-  statusBar.command = "copilotUsage.openView";
+  statusBar.command = "tonyozrCopilotUsage.openView";
 }
 function setStatusBarFailed(statusBar, error) {
   statusBar.text = STATUS_BAR_DISPLAY.failedText;
   statusBar.tooltip = error instanceof Error ? error.message : String(error);
-  statusBar.command = "copilotUsage.openView";
+  statusBar.command = "tonyozrCopilotUsage.openView";
 }
 function setStatusBarSetupNeeded(statusBar) {
   statusBar.text = STATUS_BAR_DISPLAY.setupNeededText;
   statusBar.tooltip = void 0;
-  statusBar.command = "copilotUsage.openCopilotLoggingSetting";
+  statusBar.command = "tonyozrCopilotUsage.openCopilotLoggingSetting";
 }
 function activate(context) {
   const treeProvider = new UsageTreeProvider(() => /* @__PURE__ */ new Date(), readPersistedSortMode(context));
@@ -1535,7 +1579,7 @@ function activate(context) {
   let updateChain = Promise.resolve();
   const changedPaths = /* @__PURE__ */ new Set();
   const deletedPaths = /* @__PURE__ */ new Set();
-  statusBar.command = "copilotUsage.openView";
+  statusBar.command = "tonyozrCopilotUsage.openView";
   setStatusBarScanning(statusBar);
   statusBar.show();
   void setSortModeContext(readPersistedSortMode(context));
@@ -1567,7 +1611,7 @@ function activate(context) {
     }
   }
   async function openView() {
-    await vscode3.commands.executeCommand("copilotUsage.views.usage.focus");
+    await vscode3.commands.executeCommand("tonyozrCopilotUsage.views.usage.focus");
   }
   async function openSourceLog(node) {
     if (node?.kind !== "chat") {
@@ -1721,31 +1765,31 @@ function activate(context) {
   }
   context.subscriptions.push(
     statusBar,
-    vscode3.window.registerTreeDataProvider("copilotUsage.views.usage", treeProvider),
-    vscode3.commands.registerCommand("copilotUsage.refresh", () => runRefresh()),
-    vscode3.commands.registerCommand("copilotUsage.openView", () => openView()),
+    vscode3.window.registerTreeDataProvider("tonyozrCopilotUsage.views.usage", treeProvider),
+    vscode3.commands.registerCommand("tonyozrCopilotUsage.refresh", () => runRefresh()),
+    vscode3.commands.registerCommand("tonyozrCopilotUsage.openView", () => openView()),
     vscode3.commands.registerCommand(
-      "copilotUsage.openSourceLog",
+      "tonyozrCopilotUsage.openSourceLog",
       (node) => openSourceLog(node)
     ),
-    vscode3.commands.registerCommand("copilotUsage.sortSessionsByCost", () => setSortMode("cost")),
-    vscode3.commands.registerCommand("copilotUsage.sortSessionsByTime", () => setSortMode("time")),
+    vscode3.commands.registerCommand("tonyozrCopilotUsage.sortSessionsByCost", () => setSortMode("cost")),
+    vscode3.commands.registerCommand("tonyozrCopilotUsage.sortSessionsByTime", () => setSortMode("time")),
     vscode3.commands.registerCommand(
-      "copilotUsage.openCopilotLoggingSetting",
+      "tonyozrCopilotUsage.openCopilotLoggingSetting",
       () => vscode3.commands.executeCommand(
         "workbench.action.openSettings",
         `@id:${COPILOT_FILE_LOGGING_SETTING}`
       )
     ),
     vscode3.commands.registerCommand(
-      "copilotUsage.showDiagnostics",
+      "tonyozrCopilotUsage.showDiagnostics",
       () => vscode3.window.showInformationMessage(
         latestDiagnostics ? formatDiagnostics(latestDiagnostics) : "No Copilot usage scan has completed yet.",
         { modal: true }
       )
     ),
     vscode3.workspace.onDidChangeConfiguration((event) => {
-      if (!event.affectsConfiguration("copilotUsage") && !event.affectsConfiguration(COPILOT_FILE_LOGGING_SETTING)) {
+      if (!event.affectsConfiguration("tonyozrCopilotUsage") && !event.affectsConfiguration(COPILOT_FILE_LOGGING_SETTING)) {
         return;
       }
       void runRefresh();
