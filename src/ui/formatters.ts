@@ -11,7 +11,7 @@ export function formatTokens(tokens: number): string {
   return `${Math.round(tokens)}`;
 }
 
-const FIXED_USD_TO_SEK_RATE = 10;
+export const FIXED_USD_TO_SEK_RATE = 10;
 
 export function formatUsd(usd: number, partial = false): string {
   const cents = Math.round(usd * 100);

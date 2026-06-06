@@ -18,7 +18,7 @@ import type {
   UsageSummary,
 } from "./core/types";
 import { UsageIndex } from "./core/usageIndex";
-import { formatCost, formatTokens } from "./ui/formatters";
+import { FIXED_USD_TO_SEK_RATE, formatCost, formatTokens } from "./ui/formatters";
 import {
   formatDiagnostics,
   UsageTreeProvider,
@@ -43,7 +43,6 @@ const CUSTOM_DATA_PATH_WATCH_GLOB = "**/*.{json,jsonl}";
 const GITHUB_COPILOT_USAGE_BASED_BILLING_URL =
   "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals";
 const TOOLTIP_TITLE = `Cost is based on <a href="${GITHUB_COPILOT_USAGE_BASED_BILLING_URL}">GitHub Copilot Usage-based billing $(link-external)</a>`;
-const USD_TO_SEK_MULTIPLIER = 10;
 const STATUS_BAR_NUMBER_FORMATTER = new Intl.NumberFormat("en-US");
 const STATUS_BAR_CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
@@ -72,7 +71,7 @@ function formatStatusBarCurrency(amount: number): string {
 }
 
 function formatStatusBarTokens(tokens: number): string {
-  return `${STATUS_BAR_NUMBER_FORMATTER.format(Math.round(tokens))} tok`;
+  return `${STATUS_BAR_NUMBER_FORMATTER.format(tokens)} tok`;
 }
 
 function formatStatusBarCount(count: number, suffix: string): string {
@@ -190,7 +189,7 @@ export function formatStatusBarSummary(summary: UsageSummary): string {
 
   if (summary.today.githubCopilot.available && summary.today.githubCopilot.aiCredits > 0) {
     segments.push(
-      `${formatStatusBarCurrency(summary.today.githubCopilot.usd * USD_TO_SEK_MULTIPLIER)} SEK`,
+      `${formatStatusBarCurrency(summary.today.githubCopilot.usd * FIXED_USD_TO_SEK_RATE)} SEK`,
       `$${formatStatusBarCurrency(summary.today.githubCopilot.usd)}`,
     );
   }
