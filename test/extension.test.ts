@@ -224,11 +224,11 @@ describe("formatStatusBarTooltip", () => {
     expect(tooltip.supportThemeIcons).toBe(true);
     expect(tooltip.value).not.toContain("<pre>");
     expect(formatStatusBarSummary(summary, new Date(2026, 4, 28))).toBe("215.90 SEK | $21.59 | 8,900,000 tok | 2 sess | 3 req");
-    expect(tooltip.value.startsWith('<table width="100%" style="min-width: 450px">')).toBe(true);
+    expect(tooltip.value.startsWith("**Today:**")).toBe(true);
     expect(tooltip.value).not.toContain("## Today:");
     expect(tooltip.value).not.toContain("Week:");
     expect(tooltip.value).toContain(
-      '<tr><td>**Today:** 1.2M (84 SEK (8.4$)) &nbsp;&nbsp;|&nbsp;&nbsp; **Month:** 8.9M (215.9 SEK (21.6$)) &nbsp;&nbsp;|&nbsp;&nbsp; **All time:** 22M (421.5 SEK (42.2$))</td></tr>',
+      "**Today:**&nbsp;1.2M (84 SEK (8.4$))&nbsp;&nbsp;|&nbsp;&nbsp;**Month:**&nbsp;8.9M (215.9 SEK (21.6$))&nbsp;&nbsp;|&nbsp;&nbsp;**All time:**&nbsp;22M (421.5 SEK (42.2$))",
     );
     expect(tooltip.value).toContain("---");
     expect(tooltip.value).not.toContain("GitHub Copilot usage-based");
@@ -279,9 +279,7 @@ describe("formatStatusBarTooltip", () => {
 
     expect(formatStatusBarTooltip(summary).value).toContain(
       [
-        '<table width="100%" style="min-width: 450px">',
-        '<tr><td>**Today:** 0 &nbsp;&nbsp;|&nbsp;&nbsp; **Month:** 0 &nbsp;&nbsp;|&nbsp;&nbsp; **All time:** 0</td></tr>',
-        "</table>",
+        "**Today:**&nbsp;0&nbsp;&nbsp;|&nbsp;&nbsp;**Month:**&nbsp;0&nbsp;&nbsp;|&nbsp;&nbsp;**All time:**&nbsp;0",
         "",
         "---",
         "",
@@ -358,7 +356,7 @@ describe("formatStatusBarTooltip", () => {
     };
 
     expect(formatStatusBarSummary(summary, new Date(2026, 4, 28))).toBe("1,200 tok | 1 sess | 1 req");
-    expect(formatStatusBarTooltip(summary).value).toContain("**Today:** 1k");
+    expect(formatStatusBarTooltip(summary).value).toContain("**Today:**&nbsp;1k");
     expect(formatStatusBarTooltip(summary).value).not.toContain("0$");
   });
 

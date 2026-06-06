@@ -89,8 +89,7 @@ export function formatStatusBarTooltip(summary: UsageSummary): vscode.MarkdownSt
     formatTooltipSummaryItem("Month", summary.month),
     formatTooltipSummaryItem("All time", summary.allTime),
   ];
-  const summaryRow = `<tr><td>${summaryItems.join(" &nbsp;&nbsp;|&nbsp;&nbsp; ")}</td></tr>`;
-  const lines = [...formatTooltipTable([summaryRow]), "", "---", ""];
+  const lines = [formatTooltipSummaryLine(summaryItems), "", "---", ""];
 
   const topModelRows = summary.topModels.map((model, index) =>
     formatTopModelTableRow(
@@ -111,7 +110,11 @@ export function formatStatusBarTooltip(summary: UsageSummary): vscode.MarkdownSt
 }
 
 function formatTooltipSummaryItem(label: string, total: UsageSummary["today"]): string {
-  return `**${label}:** ${formatTokensWithCost(total.tokens, total.githubCopilot)}`;
+  return `**${label}:**&nbsp;${formatTokensWithCost(total.tokens, total.githubCopilot)}`;
+}
+
+function formatTooltipSummaryLine(items: string[]): string {
+  return items.join("&nbsp;&nbsp;|&nbsp;&nbsp;");
 }
 
 function formatTokensWithCost(tokens: number, costEstimate: CopilotCostEstimate): string {
